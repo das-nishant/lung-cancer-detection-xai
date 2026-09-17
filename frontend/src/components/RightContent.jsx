@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Eye, Sliders, Sparkles, ZoomIn, ZoomOut, RotateCcw, Crosshair, Cpu, Clock, Sun, Maximize2, CheckCircle2, AlertTriangle, AlertOctagon, Info } from 'lucide-react';
-
+import { 
+  Eye, Sliders, Sparkles, ZoomIn, ZoomOut, RotateCcw, Crosshair, Cpu, 
+  Clock, Sun, Maximize2, CheckCircle2, AlertTriangle, AlertOctagon, Info,
+  ChevronUp, ChevronDown 
+} from 'lucide-react';
 
 import { API_BASE } from '../config';
 
@@ -11,6 +14,8 @@ export default function RightContent({ result, onOpenFullscreen }) {
   const [opacity, setOpacity] = useState(0.85);
   const [zoom, setZoom] = useState(1);
   const [isInverted, setIsInverted] = useState(false);
+
+  const [isCardMinimized, setIsCardMinimized] = useState(false);
 
   // ELEGANT EMPTY STATE
   if (!result) {
@@ -142,10 +147,10 @@ export default function RightContent({ result, onOpenFullscreen }) {
             onClick={() => setIsInverted(!isInverted)}
             className={`p-1.5 rounded-lg transition-colors border ${
               isInverted
-                ? 'bg-cyan-500/20 border-cyan-500 text-cyan-300'
+                ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-sm shadow-cyan-500/30'
                 : 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'
             }`}
-            title="Invert Colors"
+            title="Invert CT Scan (Light / Bone Window)"
           >
             <Sun className="w-3.5 h-3.5" />
           </button>
@@ -167,54 +172,93 @@ export default function RightContent({ result, onOpenFullscreen }) {
 
         <div className="flex items-center gap-3 text-[11px] font-mono text-slate-400">
           <span>Zoom: {Math.round(zoom * 100)}%</span>
+          {isInverted && <span className="text-cyan-400 font-bold">Light Film</span>}
           <span>Matrix: 224x224</span>
         </div>
       </div>
 
       {/* Large Canvas Viewport Frame */}
-      <div className="relative w-full h-[480px] rounded-2xl overflow-hidden bg-black border border-slate-800 shadow-2xl flex items-center justify-center dicom-grid">
+      <div className={`relative w-full h-[480px] rounded-2xl overflow-hidden ${isInverted ? 'bg-slate-950' : 'bg-black'} border border-slate-800 shadow-2xl flex items-center justify-center dicom-grid transition-colors duration-300`}>
         
         {/* FLOATING PREDICTION CARD (Top Right Overlay - Exact Wireframe Spec) */}
-        <div className="absolute top-4 right-4 z-30 bg-slate-950/90 backdrop-blur-xl p-4 rounded-2xl border border-slate-800 shadow-2xl w-60">
-          <div className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 mb-1">Prediction Card</div>
+        <div className="absolute top-4 right-4 z-30 bg-slate-950/95 backdrop-blur-2xl p-3.5 rounded-2xl border border-cyan-500/30 shadow-2xl w-60">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xl font-black text-white">{result.prediction}</span>
-            <span className="text-sm font-mono font-bold text-cyan-400">{result.confidence}%</span>
+            <span className="text-[10px] font-mono font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-cyan-950/80 text-cyan-400 border border-cyan-800">
+              Prediction Card
+            </span>
+            <button
+              onClick={() => setIsCardMinimized(!isCardMinimized)}
+              className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-900 transition-colors cursor-pointer"
+              title={isCardMinimized ? "Expand Card" : "Minimize Card"}
+            >
+              {isCardMinimized ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
+            </button>
           </div>
 
-          <div className="space-y-1.5 pt-2 border-t border-slate-800/80 text-[11px] font-mono">
-            <div className="flex items-center justify-between">
-              <span className="text-slate-400">Risk Level</span>
-              <span className={`px-2 py-0.5 rounded font-bold text-[10px] flex items-center gap-1 ${risk.color}`}>
-                {risk.icon} {risk.label}
-              </span>
+          {!isCardMinimized ? (
+            <>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xl font-black text-white">{result.prediction}</span>
+                <span className="text-sm font-mono font-bold text-cyan-400">{result.confidence}%</span>
+              </div>
+
+              <div className="space-y-1.5 pt-2 border-t border-slate-800/80 text-[11px] font-mono">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-400">Risk Level</span>
+                  <span className={`px-2 py-0.5 rounded font-bold text-[10px] flex items-center gap-1 ${risk.color}`}>
+                    {risk.icon} {risk.label}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-400">Inference Time</span>
+                  <span className="font-bold text-emerald-400 flex items-center gap-1">
+                    <Clock className="w-3 h-3" /> 0.42 s
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-400">Model</span>
+                  <span className="font-bold text-slate-200">ResNet50</span>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center justify-between pt-1 text-xs">
+              <span className="font-bold text-white">{result.prediction}</span>
+              <span className="font-mono font-bold text-cyan-400">{result.confidence}%</span>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-slate-400">Inference Time</span>
-              <span className="font-bold text-emerald-400 flex items-center gap-1">
-                <Clock className="w-3 h-3" /> 0.42 s
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-slate-400">Model</span>
-              <span className="font-bold text-slate-200">ResNet50</span>
-            </div>
-          </div>
+          )}
         </div>
 
         {/* Mode 1: Split Slider */}
         {viewMode === 'slider' && (
           <div
             className="relative w-full h-full select-none overflow-hidden flex items-center justify-center transition-transform duration-300"
-            style={{ transform: `scale(${zoom})`, filter: isInverted ? 'invert(1)' : 'none' }}
+            style={{ transform: `scale(${zoom})` }}
           >
-            {/* Base Layer: Grad-CAM Overlay */}
-            <img
-              src={overlayUrl}
-              alt="Grad-CAM Overlay"
-              className="absolute inset-0 w-full h-full object-contain pointer-events-none"
-              style={{ opacity: opacity }}
-            />
+            {/* Base Layer: Grad-CAM Overlay (Preserving True JET Heatmap Colors) */}
+            {isInverted ? (
+              <div className="absolute inset-0 w-full h-full flex items-center justify-center pointer-events-none">
+                <img
+                  src={originalUrl}
+                  alt="CT Inverted Base"
+                  className="w-full h-full object-contain pointer-events-none"
+                  style={{ filter: 'invert(1)' }}
+                />
+                <img
+                  src={heatmapUrl}
+                  alt="True Heatmap"
+                  className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+                  style={{ opacity: opacity, mixBlendMode: 'multiply' }}
+                />
+              </div>
+            ) : (
+              <img
+                src={overlayUrl}
+                alt="Grad-CAM Overlay"
+                className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+                style={{ opacity: opacity }}
+              />
+            )}
 
             {/* Top Layer: Original CT Scan clipped via CSS clip-path */}
             <div
@@ -225,6 +269,7 @@ export default function RightContent({ result, onOpenFullscreen }) {
                 src={originalUrl}
                 alt="Original CT Scan"
                 className="w-full h-full object-contain pointer-events-none"
+                style={{ filter: isInverted ? 'invert(1)' : 'none' }}
               />
             </div>
 
@@ -250,22 +295,43 @@ export default function RightContent({ result, onOpenFullscreen }) {
           </div>
         )}
 
-
         {/* Mode 2: Side-by-Side Dual View */}
         {viewMode === 'sideBySide' && (
-          <div className="grid grid-cols-2 gap-2 w-full h-full p-2" style={{ transform: `scale(${zoom})`, filter: isInverted ? 'invert(1)' : 'none' }}>
+          <div className="grid grid-cols-2 gap-2 w-full h-full p-2" style={{ transform: `scale(${zoom})` }}>
             <div className="relative h-full bg-slate-950 rounded-xl overflow-hidden flex items-center justify-center border border-slate-800">
-              <img src={originalUrl} alt="Original CT" className="max-h-full max-w-full object-contain" />
+              <img
+                src={originalUrl}
+                alt="Original CT"
+                className="max-h-full max-w-full object-contain"
+                style={{ filter: isInverted ? 'invert(1)' : 'none' }}
+              />
             </div>
             <div className="relative h-full bg-slate-950 rounded-xl overflow-hidden flex items-center justify-center border border-slate-800">
-              <img src={overlayUrl} alt="Grad-CAM Overlay" className="max-h-full max-w-full object-contain" />
+              {isInverted ? (
+                <div className="relative w-full h-full flex items-center justify-center">
+                  <img
+                    src={originalUrl}
+                    alt="Original CT"
+                    className="max-h-full max-w-full object-contain"
+                    style={{ filter: 'invert(1)' }}
+                  />
+                  <img
+                    src={heatmapUrl}
+                    alt="True Heatmap"
+                    className="absolute inset-0 w-full h-full object-contain"
+                    style={{ opacity: opacity, mixBlendMode: 'multiply' }}
+                  />
+                </div>
+              ) : (
+                <img src={overlayUrl} alt="Grad-CAM Overlay" className="max-h-full max-w-full object-contain" />
+              )}
             </div>
           </div>
         )}
 
         {/* Mode 3: Pure Heatmap */}
         {viewMode === 'heatmap' && (
-          <div className="relative w-full h-full flex items-center justify-center p-2" style={{ transform: `scale(${zoom})`, filter: isInverted ? 'invert(1)' : 'none' }}>
+          <div className="relative w-full h-full flex items-center justify-center p-2" style={{ transform: `scale(${zoom})` }}>
             <img src={heatmapUrl} alt="Pure JET Heatmap" className="max-h-full max-w-full object-contain rounded-xl" />
           </div>
         )}

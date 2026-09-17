@@ -172,8 +172,8 @@ export default function App() {
         )}
 
         {activeTab === 'reports' && (
-          <div className="max-w-5xl mx-auto">
-            <DiagnosticReport result={currentResult} />
+          <div className="w-full">
+            <DiagnosticReport result={currentResult} onNavigateDashboard={() => setActiveTab('dashboard')} />
           </div>
         )}
       </main>

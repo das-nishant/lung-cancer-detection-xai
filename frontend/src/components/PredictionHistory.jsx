@@ -1,3 +1,5 @@
+import React, { useState } from 'react';
+import { Database, Search, RefreshCw, AlertCircle, Eye, Trash2 } from 'lucide-react';
 import { API_BASE } from '../config';
 
 export default function PredictionHistory({ history = [], onDelete, onInspect, loading, onRefresh }) {
@@ -42,14 +44,14 @@ export default function PredictionHistory({ history = [], onDelete, onInspect, l
         {/* Filter Controls & Search */}
         <div className="flex flex-wrap items-center gap-3">
           {/* Search bar */}
-          <div className="relative">
-            <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-3" />
+          <div className="flex items-center gap-2.5 px-3.5 h-10 w-60 bg-slate-950/90 border border-slate-700/80 hover:border-slate-600 rounded-xl focus-within:border-cyan-400 focus-within:ring-1 focus-within:ring-cyan-400 transition-all shadow-inner">
+            <Search className="w-4 h-4 text-slate-400 shrink-0 pointer-events-none" />
             <input
               type="text"
               placeholder="Search filename..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 pr-3 py-2 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-cyan-500/80 w-44"
+              className="w-full bg-transparent border-0 outline-none text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-0 p-0 leading-normal"
             />
           </div>
 
