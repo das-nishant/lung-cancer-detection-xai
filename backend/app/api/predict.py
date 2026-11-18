@@ -88,7 +88,7 @@ async def predict_image(
 
         # Model inference
         model = get_model()
-        predicted_class, confidence, probabilities, target_idx = predict_ct_scan(tensor, img_np_224)
+        predicted_class, confidence, probabilities, target_idx = predict_ct_scan(tensor, img_np_224, sample_id=sample_id)
 
         # Generate Grad-CAM heatmaps & overlay directly in target folders
         heatmap_fn, overlay_fn, roi_stats = generate_gradcam_outputs(

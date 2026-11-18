@@ -34,6 +34,8 @@ export default function LeftSidebar({ onAnalyze, loading, samples = [], serverEr
     setSelectedFile(null);
     setSelectedSampleId(sample.id);
     setPreviewUrl(`${API_BASE}${sample.url}`);
+    // Automatically trigger XAI analysis immediately for selected sample
+    onAnalyze({ file: null, sampleId: sample.id });
   };
 
   const handleSubmit = (e) => {
@@ -162,7 +164,8 @@ export default function LeftSidebar({ onAnalyze, loading, samples = [], serverEr
             return (
               <div
                 key={s.id}
-                className={`p-3 rounded-xl border transition-all duration-200 ${isSelected
+                onClick={() => handleSelectSample(s)}
+                className={`p-3 rounded-xl border transition-all duration-200 cursor-pointer ${isSelected
                   ? 'bg-slate-900 border-cyan-400 ring-1 ring-cyan-400 shadow-lg shadow-cyan-500/10'
                   : 'bg-slate-950/60 border-slate-800/80 hover:border-slate-700 hover:bg-slate-900/40'
                   }`}
@@ -176,7 +179,6 @@ export default function LeftSidebar({ onAnalyze, loading, samples = [], serverEr
                     />
                   </div>
 
-
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-1">
                       <span className="text-xs font-black text-white truncate flex items-center gap-1">
@@ -188,14 +190,27 @@ export default function LeftSidebar({ onAnalyze, loading, samples = [], serverEr
 
                     <button
                       type="button"
-                      onClick={() => handleSelectSample(s)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSelectSample(s);
+                      }}
+                      disabled={loading && isSelected}
                       className={`mt-2 text-[10px] font-bold px-2.5 py-1 rounded-md border flex items-center gap-1 transition-all ${isSelected
                         ? 'bg-cyan-500 text-slate-950 border-cyan-400 font-extrabold'
                         : 'bg-slate-900 hover:bg-slate-800 text-slate-300 border-slate-700'
                         }`}
                     >
-                      <span>Load Sample</span>
-                      <ArrowRight className="w-2.5 h-2.5" />
+                      {loading && isSelected ? (
+                        <>
+                          <span className="w-2.5 h-2.5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin"></span>
+                          <span>Analyzing...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Load Sample</span>
+                          <ArrowRight className="w-2.5 h-2.5" />
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>
